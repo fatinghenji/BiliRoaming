@@ -242,6 +242,22 @@ class JsonHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             }
                             title in hides
                         }
+
+                        // liveTip
+                        // 就是通常在 我的 -> 创做中心 下 但不属于创作中心的提示
+                        result.getObjectFieldOrNull("liveTip")?.let { liveTip ->
+                            val text = liveTip.getObjectFieldAs<String>("text")
+                            val id = liveTip.getObjectField("id").toString()
+                            val url = liveTip.getObjectFieldAs<String>("url")
+                            val showing = id !in hides
+                            drawerItems.add(BottomItem(
+                                name = text, id = id, uri = url, showing = showing
+                            ))
+                            if (!showing) {
+                                result.setObjectField("liveTip", null)
+                            }
+                        }
+
                     }
                     accountMineClass.findFieldOrNull("vipSectionRight")?.set(result, null)
                     if (sPrefs.getBoolean("custom_theme", false)) {
@@ -427,6 +443,8 @@ class JsonHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             ?.setObjectField("followCard", null)
                     if (hidden && purifyLivePopups.contains("banner"))
                         result.setObjectField("bannerInfo", null)
+                    if (hidden && sPrefs.getBoolean("no_live_mask", false))
+                        result.setObjectField("areaMaskInfo", null)
                 }
 
                 liveRoomRecommendCardClass -> {
@@ -469,9 +487,14 @@ class JsonHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         var hasKoreaTW = false
         tab.forEach {
             when (it.getObjectFieldAs<String>("uri")) {
+                "bilibili://pgc/bangumi_v2",
                 "bilibili://pgc/home" -> hasBangumiCN = true
+
                 "bilibili://following/home_activity_tab/6544" -> hasBangumiTW = true
+
+                "bilibili://pgc/cinema_v2",
                 "bilibili://pgc/home?home_flow_type=2" -> hasMovieCN = true
+
                 "bilibili://following/home_activity_tab/168644" -> hasMovieTW = true
                 "bilibili://following/home_activity_tab/163541" -> hasKoreaHK = true
                 "bilibili://following/home_activity_tab/95636" -> hasKoreaTW = true
@@ -554,10 +577,12 @@ class JsonHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 "bilibili://pegasus/hottopic"
                 -> purifytabset.contains("hottopic")
 
+                "bilibili://pgc/bangumi_v2",
                 "bilibili://pgc/home",
                 "bilibili://following/home_activity_tab/6544"
                 -> purifytabset.contains("bangumi")
 
+                "bilibili://pgc/cinema_v2",
                 "bilibili://pgc/home?home_flow_type=2",
                 "bilibili://following/home_activity_tab/168644"
                 -> purifytabset.contains("movie")

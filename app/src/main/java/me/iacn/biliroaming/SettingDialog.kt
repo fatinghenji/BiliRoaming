@@ -89,7 +89,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             findPreference("custom_splash")?.onPreferenceChangeListener = this
             findPreference("custom_splash_logo")?.onPreferenceChangeListener = this
             findPreference("save_log")?.summary =
-                context.getString(R.string.save_log_summary).format(logFile.absolutePath)
+                XposedInit.moduleRes.getString(R.string.save_log_summary).format(logFile.absolutePath)
             findPreference("custom_server")?.onPreferenceClickListener = this
             findPreference("test_upos")?.onPreferenceClickListener = this
             findPreference("customize_bottom_bar")?.onPreferenceClickListener = this
@@ -109,6 +109,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             findPreference("filter_search")?.onPreferenceClickListener = this
             findPreference("filter_comment")?.onPreferenceClickListener = this
             findPreference("copy_access_key")?.onPreferenceClickListener = this
+            findPreference("purify_story_video_ad")?.onPreferenceClickListener = this
+            findPreference("long_press_speed")?.onPreferenceClickListener = this
             checkCompatibleVersion()
             searchItems = retrieve(preferenceScreen)
             checkUpdate()
@@ -153,22 +155,22 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
 
         private fun SearchItem.appendExtraKeywords() = when (key) {
             "custom_subtitle" -> {
-                extra.add(context.getString(R.string.custom_subtitle_remove_bg))
-                extra.add(context.getString(R.string.custom_subtitle_bold))
-                extra.add(context.getString(R.string.custom_subtitle_font_size))
-                extra.add(context.getString(R.string.custom_subtitle_stroke_color))
-                extra.add(context.getString(R.string.custom_subtitle_stroke_width))
-                extra.add(context.getString(R.string.custom_subtitle_offset))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_remove_bg))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_bold))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_font_size))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_stroke_color))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_stroke_width))
+                extra.add(XposedInit.moduleRes.getString(R.string.custom_subtitle_offset))
             }
 
             "home_filter" -> {
-                extra.add(context.getString(R.string.apply_to_relate_title))
-                extra.add(context.getString(R.string.hide_low_play_count_recommend_title))
-                extra.add(context.getString(R.string.hide_low_play_count_recommend_summary))
-                extra.add(context.getString(R.string.hide_short_duration_recommend_title))
-                extra.add(context.getString(R.string.hide_long_duration_recommend_title))
-                extra.add(context.getString(R.string.hide_duration_recommend_summary))
-                extra.add(context.getString(R.string.keywords_filter_recommend_summary))
+                extra.add(XposedInit.moduleRes.getString(R.string.apply_to_relate_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.hide_low_play_count_recommend_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.hide_low_play_count_recommend_summary))
+                extra.add(XposedInit.moduleRes.getString(R.string.hide_short_duration_recommend_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.hide_long_duration_recommend_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.hide_duration_recommend_summary))
+                extra.add(XposedInit.moduleRes.getString(R.string.keywords_filter_recommend_summary))
             }
 
             "customize_bottom_bar" -> {
@@ -180,19 +182,19 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             }
 
             "customize_dynamic" -> {
-                extra.add(context.getString(R.string.customize_dynamic_prefer_video_tab))
-                extra.add(context.getString(R.string.purify_city_title))
-                extra.add(context.getString(R.string.purify_campus_title))
-                extra.add(context.getString(R.string.customize_dynamic_all_rm_topic_title))
-                extra.add(context.getString(R.string.customize_dynamic_all_rm_up_title))
-                extra.add(context.getString(R.string.customize_dynamic_video_rm_up_title))
-                extra.add(context.getString(R.string.customize_dynamic_filter_apply_to_video))
-                extra.add(context.getString(R.string.customize_dynamic_rm_blocked_title))
-                extra.addAll(context.resources.getStringArray(R.array.dynamic_entries))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_prefer_video_tab))
+                extra.add(XposedInit.moduleRes.getString(R.string.purify_city_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.purify_campus_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_all_rm_topic_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_all_rm_up_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_video_rm_up_title))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_filter_apply_to_video))
+                extra.add(XposedInit.moduleRes.getString(R.string.customize_dynamic_rm_blocked_title))
+                extra.addAll(XposedInit.moduleRes.getStringArray(R.array.dynamic_entries))
             }
 
             "pref_import", "pref_export" -> {
-                extra.add(context.getString(R.string.pref_backup))
+                extra.add(XposedInit.moduleRes.getString(R.string.pref_backup))
             }
 
             else -> false
@@ -212,7 +214,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
 
         private fun checkUposServer() {
             val currentServer = prefs.getString("upos_host", null).orEmpty()
-            val serverList = context.resources.getStringArray(R.array.upos_values)
+            val serverList = XposedInit.moduleRes.getStringArray(R.array.upos_values)
             if (currentServer !in serverList) {
                 scope.launch(Dispatchers.IO) {
                     val defaultServer =
@@ -223,7 +225,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
         }
 
         private fun checkUpdate() {
-            val url = URL(context.getString(R.string.version_url))
+            val url = URL(XposedInit.moduleRes.getString(R.string.version_url))
             scope.launch {
                 val result = fetchJson(url) ?: return@launch
                 val newestVer = result.optString("name")
@@ -234,9 +236,9 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     (findPreference("about") as PreferenceCategory).addPreference(
                         Preference(activity).apply {
                             key = "update"
-                            title = context.getString(R.string.update_title)
+                            title = XposedInit.moduleRes.getString(R.string.update_title)
                             summary = result.optString("body").substringAfterLast("更新日志\r\n")
-                                .ifEmpty { context.getString(R.string.update_summary) }
+                                .ifEmpty { XposedInit.moduleRes.getString(R.string.update_summary) }
                             onPreferenceClickListener = this@PrefsFragment
                             order = 1
                         })
@@ -261,12 +263,14 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             var supportDrawerStyle = true
             val supportRevertLive = versionCode < 6830000
             var supportAddTag = true
+            var supportCustomTheme = true
             when (platform) {
                 "android_hd" -> {
                     supportCustomizeTab = false
                     supportDrawer = false
                     supportDrawerStyle = false
                     supportAddTag = false
+                    supportCustomTheme = false
                 }
             }
             val supportSplashHook = instance.brandSplashClass != null
@@ -287,7 +291,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 if (versionCode >= 7500300) {
                     disablePreference(
                             "music_notification",
-                            context.getString(R.string.os_not_support))
+                            XposedInit.moduleRes.getString(R.string.os_not_support))
                 } else {
                     disablePreference("music_notification")
                 }
@@ -324,11 +328,14 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 disablePreference("add_korea")
                 disablePreference("add_movie")
             }
+            if (!supportCustomTheme) {
+                disablePreference("custom_theme")
+            }
         }
 
         private fun disablePreference(
             name: String,
-            message: String = context.getString(R.string.not_support)
+            message: String = XposedInit.moduleRes.getString(R.string.not_support)
         ) {
             findPreference(name)?.run {
                 isEnabled = false
@@ -477,7 +484,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
         }
 
         private fun onUpdateClick(): Boolean {
-            val uri = Uri.parse(context.getString(R.string.update_url))
+            val uri = Uri.parse(XposedInit.moduleRes.getString(R.string.update_url))
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
             return true
@@ -508,7 +515,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     }
                 }
                 setNegativeButton("获取公共解析服务器") { _, _ ->
-                    val uri = Uri.parse(context.getString(R.string.server_url))
+                    val uri = Uri.parse(XposedInit.moduleRes.getString(R.string.server_url))
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     startActivity(intent)
                 }
@@ -528,14 +535,14 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                         seekBar: SeekBar?, progress: Int, fromUser: Boolean
                     ) {
                         tvHint.text =
-                            context.getString(R.string.danmaku_filter_weight_hint, progress)
+                            XposedInit.moduleRes.getString(R.string.danmaku_filter_weight_hint, progress)
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
                 })
                 val current = prefs.getInt("danmaku_filter_weight", 0)
-                tvHint.text = context.getString(R.string.danmaku_filter_weight_hint, current)
+                tvHint.text = XposedInit.moduleRes.getString(R.string.danmaku_filter_weight_hint, current)
                 seekBar.progress = current
                 setTitle(R.string.danmaku_filter_title)
                 setNegativeButton(android.R.string.cancel, null)
@@ -594,7 +601,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     if (it.isEmpty() || ids.contains(it)) return@forEach
                     bottomItems.add(JsonHook.BottomItem("未知", null, it, false))
                 }
-                setTitle(context.getString(R.string.customize_bottom_bar_title))
+                setTitle(XposedInit.moduleRes.getString(R.string.customize_bottom_bar_title))
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     val hideItems = mutableSetOf<String>()
                     bottomItems.forEach {
@@ -699,7 +706,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 return true
             }
             AlertDialog.Builder(activity)
-                .setTitle(context.getString(R.string.share_log_title))
+                .setTitle(XposedInit.moduleRes.getString(R.string.share_log_title))
                 .setItems(arrayOf("log.txt", "old_log.txt (崩溃相关发这个)")) { _, which ->
                     val toShareLog = if (which == 0) logFile else oldLogFile
                     if (toShareLog.exists()) {
@@ -714,7 +721,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                             putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             setDataAndType(uri, "text/log")
-                        }, context.getString(R.string.share_log_title)))
+                        }, XposedInit.moduleRes.getString(R.string.share_log_title)))
                     } else {
                         Log.toast("日志文件不存在", force = true)
                     }
@@ -731,7 +738,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     if (it.isEmpty() || ids.contains(it)) return@forEach
                     JsonHook.drawerItems.add(JsonHook.BottomItem("未知", null, it, false))
                 }
-                setTitle(context.getString(R.string.customize_drawer_title))
+                setTitle(XposedInit.moduleRes.getString(R.string.customize_drawer_title))
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     val hideItems = mutableSetOf<String>()
                     JsonHook.drawerItems.forEach {
@@ -763,7 +770,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             tv.setText(sPrefs.getString("custom_link", ""))
             tv.hint = "bilibili://user_center/vip"
             AlertDialog.Builder(activity).run {
-                setTitle(context.getString(R.string.custom_link_summary))
+                setTitle(XposedInit.moduleRes.getString(R.string.custom_link_summary))
                 setView(tv)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     if (tv.text.toString().startsWith("bilibili://")) {
@@ -861,6 +868,88 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             return true
         }
 
+        private fun onPurifyStoryVideoAdClick(): Boolean {
+            AlertDialog.Builder(activity).apply {
+                val tagMap = linkedMapOf(
+                    "ad" to "广告（推荐勾选）",
+                    "short" to "短剧（推荐勾选）",
+                    "shopping" to "购物（推荐勾选）",
+                    "tv" to "电视剧（强烈不推荐勾选，此处仅为视频同款电视剧，勾选后将无法见带有此标签视频！",
+                    "doc" to "纪录片（强烈不推荐勾选，此处仅为视频同款纪录片，勾选后将无法见带有此标签视频！）",
+                    "ent" to "娱乐（强烈不推荐勾选，此处仅为视频同款内容，勾选后将无法见带有此标签视频！）",
+                    "movie" to "电影（强烈不推荐勾选，此处仅为视频同款电影，勾选后将无法见带有此标签视频！）",
+                    "music" to "音乐（强烈不推荐勾选，此处仅为视频同款音乐，勾选后将无法看见带有此标签视频！",
+                    "topic" to "话题（强烈不推荐勾选，此处仅为视频相关话题，勾选后将无法看见带有此标签视频！",
+                )
+
+                val prefKey = "purify_story_video_ad_tags"
+                val oldPurifyAdTags = sPrefs.getStringSet(prefKey, emptySet()) ?: emptySet()
+
+                val keys = tagMap.keys.toList()
+                val values = tagMap.values.toTypedArray()
+
+                val checkedTags = BooleanArray(keys.size) { index ->
+                    keys[index] in oldPurifyAdTags
+                }
+
+                val blockedCount = sPrefs.getInt("purify_story_video_ad_blocked_count", 0)
+
+                setTitle(XposedInit.moduleRes.getString(R.string.purify_story_video_ad_title) + "（累计拦截 $blockedCount 条）")
+                setPositiveButton(context.getString(android.R.string.ok)) { _, _ ->
+                    val selected = mutableSetOf<String>()
+                    for (i in keys.indices) {
+                        if (checkedTags[i]) selected.add(keys[i])
+                    }
+                    sPrefs.edit().putStringSet(prefKey, selected).apply()
+                    Toast.makeText(activity, "已保存净化选项，重启客户端生效", Toast.LENGTH_SHORT).show()
+                }
+
+                setNegativeButton(android.R.string.cancel, null)
+
+                setNeutralButton("重置") { _, _ ->
+                    sPrefs.edit().remove(prefKey).apply()
+                }
+
+                setMultiChoiceItems(values, checkedTags) { _, which, isChecked ->
+                    checkedTags[which] = isChecked
+                }
+            }.show()
+            return true
+        }
+
+        private fun onLongPressSpeedClick(): Boolean {
+            AlertDialog.Builder(activity).run {
+                val view = context.inflateLayout(R.layout.seekbar_dialog)
+                val seekBar = view.findViewById<SeekBar>(R.id.seekBar)
+                seekBar.max = 100
+                val tvHint = view.findViewById<TextView>(R.id.tvHint)
+                seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+                    @SuppressLint("SetTextI18n")
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?, progress: Int, fromUser: Boolean
+                    ) {
+                        tvHint.text = "${progress * 10}%"
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                })
+                val current = prefs.getInt("long_press_speed", 300)
+                @SuppressLint("SetTextI18n")
+                tvHint.text = "${current * 10}%"
+                seekBar.progress = current / 10
+                setTitle(R.string.long_press_speed)
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    prefs.edit().putInt("long_press_speed", seekBar.progress * 10).apply()
+                }
+                setView(view)
+                show()
+
+            }
+            return true
+        }
+
         @Deprecated("Deprecated in Java")
         override fun onPreferenceClick(preference: Preference) = when (preference.key) {
             "version" -> onVersionClick()
@@ -882,6 +971,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             "filter_search" -> onFilterSearchClick()
             "filter_comment" -> onFilterCommentClick()
             "copy_access_key" -> onCopyAccessKeyClick()
+            "purify_story_video_ad" -> onPurifyStoryVideoAdClick()
+            "long_press_speed" -> onLongPressSpeedClick()
             else -> false
         }
     }
@@ -958,7 +1049,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             val endIdx = startIdx + hint.hint.length
             if (endIdx > length) return this
             val flags = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            val hintColor = preference.context.getColor(R.color.text_search_hint)
+            val hintColor = XposedInit.moduleRes.getColor(R.color.text_search_hint, null)
             val colorSpan = ForegroundColorSpan(hintColor)
             val boldSpan = StyleSpan(Typeface.BOLD)
             return SpannableStringBuilder(this).apply {

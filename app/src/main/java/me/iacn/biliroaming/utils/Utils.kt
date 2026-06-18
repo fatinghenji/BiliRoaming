@@ -24,10 +24,12 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.lang.ref.WeakReference
+import java.lang.reflect.Field
 import java.lang.reflect.Proxy
 import java.math.BigInteger
 import java.net.URL
 import java.util.*
+import java.util.function.Consumer
 import kotlin.math.roundToInt
 import kotlin.reflect.KProperty
 
@@ -63,6 +65,18 @@ fun bv2av(bv: String): Long {
     return r.and(2251799813685247L).xor(23442827791579L)
 }
 
+fun av2bv(aid: Long): String {
+    val s = CharArray(12) { if (it < 3) "BV1"[it] else '0' }
+    var t = ((1L shl 51) or aid) xor 23442827791579L
+    var i = 11
+    while (t > 0) {
+        s[i--] = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"[(t % 58).toInt()]
+        t /= 58
+    }
+    s[3] = s[9].also { s[9] = s[3] }
+    s[4] = s[7].also { s[7] = s[4] }
+    return String(s)
+}
 fun getPackageVersion(packageName: String) = try {
     @Suppress("DEPRECATION")
     systemContext.packageManager.getPackageInfo(packageName, 0).run {
@@ -335,7 +349,7 @@ fun Window.blurBackground() {
     addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
     attributes.blurBehindRadius = 50
     setBackgroundBlurRadius(50)
-    val blurEnableListener = { enable: Boolean ->
+    val blurEnableListener = Consumer<Boolean> { enable: Boolean ->
         setDimAmount(if (enable) 0.1F else 0.6F)
     }
     decorView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -436,4 +450,31 @@ fun Context.inflateLayout(
 
 fun Context.addModuleAssets() {
     resources.assets.callMethod("addAssetPath", XposedInit.modulePath)
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+fun Any.dumpToString(): String {
+    val sb = StringBuilder()
+    sb.append("---- ${this.javaClass.name}@${this.hashCode().toHexString()} dump begin ----\n")
+    fun dumpClassFields(clazz: Class<*>) {
+        clazz.declaredFields.forEach { field ->
+            if (field.isStatic) return@forEach
+            field.isAccessible = true
+            val v = field.get(this)
+            sb.append("${field.name}: $v\n")
+        }
+        clazz.superclass?.let {
+            dumpClassFields(it)
+        }
+    }
+    dumpClassFields(this.javaClass)
+    sb.append("---- ${this.javaClass.name}@${this.hashCode().toHexString()} dump end ----")
+    return sb.toString()
+}
+
+fun Class<*>.findField(filter: (Field) -> Boolean): Field? {
+    return declaredFields.find { field ->
+        field.isAccessible = true
+        filter(field)
+    } ?: superclass?.findField(filter)
 }

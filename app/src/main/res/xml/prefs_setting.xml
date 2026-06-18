@@ -129,6 +129,11 @@
             android:title="@string/comment_copy_enhance_title" />
 
         <SwitchPreference
+            android:key="copy_comment"
+            android:summary="@string/copy_comment_summary"
+            android:title="@string/copy_comment_title" />
+
+        <SwitchPreference
             android:key="mini_program"
             android:summary="@string/mini_program_summary"
             android:title="@string/mini_program_title" />
@@ -237,6 +242,14 @@
             android:summary="@string/full_screen_quality_summary"
             android:title="@string/full_screen_quality_title" />
 
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/live_quality_entries"
+            android:entryValues="@array/live_quality_values"
+            android:key="live_quality"
+            android:summary="@string/live_quality_summary"
+            android:title="@string/live_quality_title" />
+
         <SwitchPreference
             android:key="block_comment_guide"
             android:summary="@string/block_comment_guide_summary"
@@ -247,10 +260,12 @@
             android:summary="@string/disable_auto_refresh_summary"
             android:title="@string/disable_auto_refresh_title" />
 
+        <!--
         <SwitchPreference
             android:key="disable_auto_select"
             android:summary="@string/disable_auto_select_summary"
             android:title="@string/disable_auto_select_title" />
+            -->
 
         <SwitchPreference
             android:key="disable_vip_dm_colorful"
@@ -273,8 +288,13 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="fake_non_multiwindow"
-            android:title="@string/fake_non_multiwindow_title"
-            android:summary="@string/fake_non_multiwindow_summary"/>
+            android:summary="@string/fake_non_multiwindow_summary"
+            android:title="@string/fake_non_multiwindow_title" />
+
+        <Preference
+            android:defaultValue="300"
+            android:key="long_press_speed"
+            android:title="@string/long_press_speed" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_backup">
         <Preference
@@ -303,6 +323,16 @@
             android:key="customize_bottom_bar"
             android:summary="@string/customize_bottom_bar_summary"
             android:title="@string/customize_bottom_bar_title" />
+        <SwitchPreference
+            android:dependency="hidden"
+            android:key="skip_reward_ad"
+            android:summary="@string/skip_reward_ad_summary"
+            android:title="@string/skip_reward_ad_title" />
+        <Preference
+            android:dependency="hidden"
+            android:key="purify_story_video_ad"
+            android:summary="@string/purify_story_video_ad_summary"
+            android:title="@string/purify_story_video_ad_title" />
         <SwitchPreference
             android:dependency="hidden"
             android:key="purify_game"
@@ -488,6 +518,11 @@
             android:summary="@string/remove_up_vip_label_summary"
             android:title="@string/remove_up_vip_label_title" />
 
+        <SwitchPreference
+            android:dependency="hidden"
+            android:key="no_live_mask"
+            android:summary="@string/no_live_mask_summary"
+            android:title="@string/no_live_mask_title" />
         <MultiSelectListPreference
             android:dependency="hidden"
             android:entries="@array/live_popup_entries"
@@ -509,10 +544,16 @@
             android:key="block_video_comment"
             android:title="@string/block_video_comment_title" />
 
+        <SwitchPreference
+            android:dependency="hidden"
+            android:key="skip_video_ad"
+            android:summary="@string/skip_video_ad_summary"
+            android:title="@string/skip_video_ad_title" />
+
         <Preference
             android:key="copy_access_key"
-            android:title="@string/copy_access_key_title"
-            android:summary="@string/copy_access_key_summary" />
+            android:summary="@string/copy_access_key_summary"
+            android:title="@string/copy_access_key_title" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/setting_category">

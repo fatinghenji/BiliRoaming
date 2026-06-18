@@ -45,6 +45,11 @@ class DynamicFilterDialog(activity: Activity, prefs: SharedPreferences) :
         ).let { root.addView(it.first); it.second }
         rmUpOfAllSwitch.isChecked = prefs.getBoolean("customize_dynamic_all_rm_up", false)
 
+        val rmLiveOfAllSwitch = switchPrefsItem(
+            string(R.string.customize_dynamic_all_rm_live_title)
+        ).let { root.addView(it.first); it.second }
+        rmLiveOfAllSwitch.isChecked = prefs.getBoolean("customize_dynamic_all_rm_live", false)
+
         val rmUpOfVideoSwitch = switchPrefsItem(
             string(R.string.customize_dynamic_video_rm_up_title)
         ).let { root.addView(it.first); it.second }
@@ -76,8 +81,8 @@ class DynamicFilterDialog(activity: Activity, prefs: SharedPreferences) :
             )
         }
         root.addView(gridLayout)
-        val dynamicTypes = context.resources.getStringArray(R.array.dynamic_entries).zip(
-            context.resources.getStringArray(R.array.dynamic_values)
+        val dynamicTypes = XposedInit.moduleRes.getStringArray(R.array.dynamic_entries).zip(
+            XposedInit.moduleRes.getStringArray(R.array.dynamic_values)
         )
         val colSpec = fun(colWeight: Float) = GridLayout.spec(GridLayout.UNDEFINED, colWeight)
         val rowSpec = { GridLayout.spec(GridLayout.UNDEFINED) }
@@ -143,6 +148,7 @@ class DynamicFilterDialog(activity: Activity, prefs: SharedPreferences) :
                 putBoolean("purify_campus", rmCampusTabSwitch.isChecked)
                 putBoolean("customize_dynamic_all_rm_topic", rmTopicOfAllSwitch.isChecked)
                 putBoolean("customize_dynamic_all_rm_up", rmUpOfAllSwitch.isChecked)
+                putBoolean("customize_dynamic_all_rm_live", rmLiveOfAllSwitch.isChecked)
                 putBoolean("customize_dynamic_video_rm_up", rmUpOfVideoSwitch.isChecked)
                 putBoolean("filter_apply_to_video", filterApplyToVideoSwitch.isChecked)
                 putBoolean("customize_dynamic_rm_blocked", rmBlockedSwitch.isChecked)

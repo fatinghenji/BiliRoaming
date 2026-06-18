@@ -103,6 +103,7 @@
     <string name="hide_low_play_count_recommend_title">隐藏低播放量视频</string>
     <string name="hide_low_play_count_recommend_summary">隐藏低于指定播放量的视频</string>
     <string name="hide_top_entrance_popular_summary">隐藏热门的顶栏(排行榜等)</string>
+    <string name="hide_topic_list_popular_summary">隐藏热门的话题</string>
     <string name="hide_suggest_follow_popular_summary">隐藏热门的推荐关注(及其视频)</string>
     <string name="add_bangumi_title">添加其他地区番剧</string>
     <string name="add_bangumi_summary">在首页标签添加大陆/港澳台番剧分页</string>
@@ -116,6 +117,8 @@
     <string name="comment_copy_title">去除长按复制</string>
     <string name="comment_copy_enhance_title">长按自由复制</string>
     <string name="comment_copy_enhance_summary">长按私信/评论/动态/视频简介时弹出自由选择对话框，需要开启“去除长按复制”</string>
+    <string name="copy_comment_title">评论自由复制</string>
+    <string name="copy_comment_summary">评论复制按钮可以自由复制</string>
     <string name="revert_live_room_feed_title">强制旧版直播间样式</string>
     <string name="revert_live_room_feed_summary">强制直播间使用旧版样式</string>
     <string name="block_video_ad_title">屏蔽视频下方推荐</string>
@@ -132,6 +135,8 @@
     <string name="force_th_comment_summary">强制开启串台的泰区评论弹幕（仅调试使用）</string>
     <string name="share_log_title">分享日志</string>
     <string name="share_log_summary">可能在旧版无效</string>
+    <string name="clear_hook_cache_title">清除hook缓存</string>
+    <string name="clear_hook_cache_summary">下次打开哔哩哔哩时强制重新扫描hook信息</string>
     <string name="replace_story_video_title">替换竖版视频</string>
     <string name="replace_story_video_summary">替换竖版视频为正常视频</string>
     <string name="customize_drawer_title">自定义我的页面</string>
@@ -143,7 +148,7 @@
     <string name="drawer_style_title">修改我的页面样式</string>
     <string name="drawer_style_summary">开启改为列表，关闭改为按钮</string>
     <string name="purify_share_title">净化分享</string>
-    <string name="purify_share_summary">把分享链接中的 b23.tv 短链接换成正常链接</string>
+    <string name="purify_share_summary">把分享链接中的短链接换成正常链接</string>
     <string name="custom_link_title">开启自定义链接</string>
     <string name="custom_link_summary">仅支持 bilibili:// 开头的格式</string>
     <string name="add_custom_button_title">在【我的】页面添加自定义按钮</string>
@@ -158,7 +163,8 @@
     <string name="customize_dynamic_summary">支持移除同城及校园标签，支持移除话题及最常访问，支持按类型和关键词过滤动态</string>
     <string name="customize_dynamic_prefer_video_tab">首选视频标签</string>
     <string name="customize_dynamic_all_rm_topic_title">移除热门话题（综合）</string>
-    <string name="customize_dynamic_all_rm_up_title">移除最常访问（综合）</string>
+    <string name="customize_dynamic_all_rm_up_title">移除最常访问UP（综合）</string>
+    <string name="customize_dynamic_all_rm_live_title">移除最常访问直播（综合）</string>
     <string name="customize_dynamic_video_rm_up_title">移除最常访问（视频）</string>
     <string name="customize_dynamic_filter_apply_to_video">过滤设置同时作用于视频分区</string>
     <string name="customize_dynamic_rm_blocked_title">屏蔽无权查看动态(例如充电专属)</string>
@@ -264,12 +270,16 @@
     <string name="half_screen_quality_summary">设置视频半屏播放时的清晰度，设置后会大幅降低视频的首次播放加载速度，旧版播放器（半屏时进度条在框内）仅支持跟随全屏清晰度，需开启解锁番剧限制选项</string>
     <string name="full_screen_quality_title">视频全屏清晰度</string>
     <string name="full_screen_quality_summary">设置视频全屏播放时默认的清晰度，当播放器画质选项为自动时此选项不生效，需开启解锁番剧限制选项</string>
+    <string name="live_quality_title">直播清晰度</string>
+    <string name="live_quality_summary">设置进入直播间的默认清晰度，若不存在指定清晰度，则会取最接近的清晰度</string>
     <string name="block_comment_guide_title">屏蔽评论引导</string>
     <string name="block_comment_guide_summary">屏蔽视频详情页及评论页的评论引导提示</string>
     <string name="disable_auto_refresh_title">禁止首页自动刷新</string>
     <string name="disable_auto_refresh_summary">禁止首页内容在退至后台、切换其他页面一段时间后返回或热重启时自动刷新</string>
+    <!--
     <string name="disable_auto_select_title">禁止自动转到动态</string>
     <string name="disable_auto_select_summary">禁止评论带图时自动勾选转到动态</string>
+    -->
     <string name="apply_to_relate_title">同时应用于视频下方推荐</string>
     <string name="disable_vip_dm_colorful_title">过滤渐变色弹幕</string>
     <string name="disable_vip_dm_colorful_summary">渐变色（非普通彩色）弹幕显示为白色</string>
@@ -282,6 +292,7 @@
     <string name="filter_search_title">过滤搜索</string>
     <string name="filter_search_summary">按内容过滤搜索结果</string>
     <string name="filter_search_video">过滤视频</string>
+    <string name="filter_search_remove_relate_promote">搜索结果移除推广</string>
     <string name="filter_comment_title">过滤评论</string>
     <string name="filter_comment_summary">按内容过滤评论</string>
     <string name="keyword_group_name_at_up">\@的用户名</string>
@@ -297,4 +308,13 @@
     <string name="copy_access_key_toast">已复制</string>
     <string name="auto_dark_splash_title">启动屏背景适配深色</string>
     <string name="auto_dark_splash_summary">防瞎眼</string>
+    <string name="no_live_mask_title">隐藏直播模糊遮罩</string>
+    <string name="no_live_mask_summary">隐藏部分直播的模糊遮罩</string>
+    <string name="skip_reward_ad_title">跳过视频激励广告</string>
+    <string name="skip_reward_ad_summary">有了这个，终于能过第二关了😋（需重启两次哔哩哔哩）</string>
+    <string name="purify_story_video_ad_title">净化竖屏模式广告/推广</string>
+    <string name="purify_story_video_ad_summary">有了这个，连第一关都看不到了😭</string>
+    <string name="long_press_speed">长按播放速度设置</string>
+    <string name="skip_video_ad_title">跳过视频广告</string>
+    <string name="skip_video_ad_summary">一个简单的跳过视频广告功能，参考BilibiliSponsorBlock实现</string>
 </resources>

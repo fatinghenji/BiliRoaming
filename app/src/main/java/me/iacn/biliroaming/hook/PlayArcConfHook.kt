@@ -14,7 +14,7 @@ class PlayArcConfHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (!sPrefs.getBoolean("play_arc_conf", false)) return
 
         instance.playURLMossClass?.hookAfterMethod(
-            "playView", instance.playViewReqClass
+            if (instance.useNewMossFunc) "executePlayView" else "playView", instance.playViewReqClass
         ) { param ->
             param.result?.callMethod("getPlayArc")?.run {
                 arrayOf(
@@ -41,11 +41,12 @@ class PlayArcConfHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 }
 
         instance.playerMossClass?.hookAfterMethod(
-            "playViewUnite", instance.playViewUniteReqClass
+            if (instance.useNewMossFunc) "executePlayViewUnite" else "playViewUnite",
+            instance.playViewUniteReqClass
         ) { param ->
             param.result?.callMethod("mergePlayArcConf", arcConfs)
         }
-        instance.playerMossClass?.hookAfterMethod("playViewUnite", instance.playViewUniteReqClass, instance.mossResponseHandlerClass) { param ->
+        instance.playerMossClass?.hookBeforeMethod("playViewUnite", instance.playViewUniteReqClass, instance.mossResponseHandlerClass) { param ->
             param.args[1] = param.args[1].mossResponseHandlerProxy { resp ->
                 resp?.callMethod("mergePlayArcConf", arcConfs)
             }
@@ -81,7 +82,7 @@ class PlayArcConfHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 hooker = playlistHook
             )
             hookAfterMethod(
-                "playURL",
+                if (instance.useNewMossFunc) "executePlayURL" else "playURL",
                 "com.bapis.bilibili.app.listener.v1.PlayURLReq"
             ) { param ->
                 if (instance.networkExceptionClass?.isInstance(param.throwable) == true)

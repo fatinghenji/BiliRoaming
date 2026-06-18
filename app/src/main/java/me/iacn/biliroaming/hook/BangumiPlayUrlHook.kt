@@ -33,7 +33,7 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         private const val PGC_ANY_MODEL_TYPE_URL =
             "type.googleapis.com/bilibili.app.playerunite.pgcanymodel.PGCAnyModel"
         private const val UGC_ANY_MODEL_TYPE_URL =
-                "type.googleapis.com/bilibili.app.playerunite.ugcanymodel.UGCAnyModel"
+            "type.googleapis.com/bilibili.app.playerunite.ugcanymodel.UGCAnyModel"
         private val codecMap =
             mapOf(CodeType.CODE264 to 7, CodeType.CODE265 to 12, CodeType.CODEAV1 to 13)
         val supportedPlayArcIndices = arrayOf(
@@ -197,7 +197,7 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         "com.bapis.bilibili.pgc.gateway.player.v2.PlayURLMoss".findClassOrNull(mClassLoader)?.run {
             var isDownload = false
             hookBeforeMethod(
-                "playView",
+                if (instance.useNewMossFunc) "executePlayView" else "playView",
                 "com.bapis.bilibili.pgc.gateway.player.v2.PlayViewReq"
             ) { param ->
                 val request = param.args[0]
@@ -226,7 +226,7 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 }
             }
             hookAfterMethod(
-                "playView",
+                if (instance.useNewMossFunc) "executePlayView" else "playView",
                 "com.bapis.bilibili.pgc.gateway.player.v2.PlayViewReq"
             ) { param ->
                 // th:
@@ -269,9 +269,30 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 }
             }
         }
+
+        // 修复下载时提示获取剧集信息失败
+        instance.resolveClientCompanionClass?.hookAfterMethod(
+            instance.buildCommonResolverParamsMethod(),
+            instance.videoDownloadEntryClass
+        ) { param ->
+            val entry = param.args[0].callMethodAs<JSONObject?>("toJsonObject")
+            val seasonId = entry?.optString("season_id")
+            val epId = entry?.optJSONObject("ep")?.optString("episode_id")
+            val extraMap = buildMap {
+                seasonId?.let { put("season_id", it) }
+                epId?.let { put("ep_id", it) }
+            }.ifEmpty {
+                return@hookAfterMethod
+            }
+            param.result.callMethod(instance.setExtraContentMethod(), extraMap)
+        }
+
         instance.playerMossClass?.run {
             var isDownload = false
-            hookBeforeMethod("playViewUnite", instance.playViewUniteReqClass) { param ->
+            hookBeforeMethod(
+                if (instance.useNewMossFunc) "executePlayViewUnite" else "playViewUnite",
+                instance.playViewUniteReqClass
+            ) { param ->
                 val request = param.args[0]
                 val vod = request.callMethod("getVod") ?: return@hookBeforeMethod
                 isDownload = sPrefs.getBoolean("allow_download", false)
@@ -298,7 +319,10 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                     }
                 }
             }
-            hookAfterMethod("playViewUnite", instance.playViewUniteReqClass) { param ->
+            hookAfterMethod(
+                if (instance.useNewMossFunc) "executePlayViewUnite" else "playViewUnite",
+                instance.playViewUniteReqClass
+            ) { param ->
                 if (instance.networkExceptionClass?.isInstance(param.throwable) == true)
                     return@hookAfterMethod
                 val request = param.args[0]
@@ -307,18 +331,34 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         .on(mClassLoader).new()
                 val supplementAny = response.callMethod("getSupplement")
                 val typeUrl = supplementAny?.callMethodAs<String>("getTypeUrl")
+
                 // Only handle pgc video
-                if (param.result != null && typeUrl != PGC_ANY_MODEL_TYPE_URL)
+                ///////////////////
+                // newPlayUnite:
+                // request.vod.cid, response.play_arc.cid need skip
+                val requestVod = request.callMethod("getVod")
+                val reqCid = requestVod?.callMethodAs<Long>("getCid")
+
+                val responsePlayArc = response.callMethod("getPlayArc")
+                val respCid = responsePlayArc?.callMethodAs<Long>("getCid")
+
+                val isThai = reqCid != 0.toLong() && reqCid != respCid
+                // if it is download request
+                // can't skip
+                if (!isDownload && param.result != null && typeUrl != PGC_ANY_MODEL_TYPE_URL && !isThai
+                ) {
                     return@hookAfterMethod
+                }
+
                 val extraContent = request.callMethodAs<Map<String, String>>("getExtraContentMap")
                 val seasonId = extraContent.getOrDefault("season_id", "0")
                 val reqEpId = extraContent.getOrDefault("ep_id", "0").toLong()
-                if (seasonId == "0" && reqEpId == 0L)
+                if (!isDownload && seasonId == "0" && reqEpId == 0L)
                     return@hookAfterMethod
                 val supplement = supplementAny?.callMethod("getValue")
                     ?.callMethodAs<ByteArray>("toByteArray")
-                    ?.let { PlayViewReply.parseFrom(it) } ?: playViewReply {}
-                if (needProxyUnite(response, supplement)) {
+                    ?.runCatchingOrNull { PlayViewReply.parseFrom(this) } ?: playViewReply {}
+                if (needProxyUnite(response, supplement) || isThai) {
                     try {
                         val serializedRequest = request.callMethodAs<ByteArray>("toByteArray")
                         val req = PlayViewUniteReq.parseFrom(serializedRequest)
@@ -332,10 +372,11 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         }
                             ?: throw CustomServerException(mapOf("未知错误" to "请检查哔哩漫游设置中解析服务器设置。"))
                     } catch (e: CustomServerException) {
-                        param.result = showPlayerErrorUnite(
-                            response, supplement,
-                            "请求解析服务器发生错误", e.message, true
-                        )
+                        // v8.48.0+ 打开缓存弹窗导致应用崩溃
+//                        param.result = showPlayerErrorUnite(
+//                            response, supplement,
+//                            "请求解析服务器发生错误", e.message, true
+//                        )
                         Log.toast("请求解析服务器发生错误: ${e.message}", alsoLog = true)
                     }
                 } else if (isDownload) {
@@ -382,9 +423,22 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             .on(mClassLoader).new()
                     val supplementAny = response.callMethod("getSupplement")
                     val typeUrl = supplementAny?.callMethodAs<String>("getTypeUrl")
+
                     // Only handle pgc video
-                    if (originalResp != null && typeUrl != PGC_ANY_MODEL_TYPE_URL)
+                    ///////////////////
+                    // newPlayUnite:
+                    // request.vod.cid, response.play_arc.cid
+                    val requestVod = request.callMethod("getVod")
+                    val reqCid = requestVod?.callMethodAs<Long>("getCid")
+
+                    val responsePlayArc = response.callMethod("getPlayArc")
+                    val respCid = responsePlayArc?.callMethodAs<Long>("getCid")
+
+                    val isThai = reqCid != 0.toLong() && reqCid != respCid
+                    if (originalResp != null && typeUrl != PGC_ANY_MODEL_TYPE_URL && !isThai) {
                         return@mossResponseHandlerReplaceProxy null
+                    }
+
                     val extraContent =
                         request.callMethodAs<Map<String, String>>("getExtraContentMap")
                     val seasonId = extraContent.getOrDefault("season_id", "0")
@@ -393,8 +447,8 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                         return@mossResponseHandlerReplaceProxy null
                     val supplement = supplementAny?.callMethod("getValue")
                         ?.callMethodAs<ByteArray>("toByteArray")
-                        ?.let { PlayViewReply.parseFrom(it) } ?: playViewReply {}
-                    val newResponse = if (needProxyUnite(response, supplement)) {
+                        ?.runCatchingOrNull { PlayViewReply.parseFrom(this) } ?: playViewReply {}
+                    val newResponse = if (needProxyUnite(response, supplement) || isThai) {
                         try {
                             val serializedRequest = request.callMethodAs<ByteArray>("toByteArray")
                             val req = PlayViewUniteReq.parseFrom(serializedRequest)
@@ -423,7 +477,8 @@ class BangumiPlayUrlHook(classLoader: ClassLoader) : BaseHook(classLoader) {
             }
         }
         instance.playURLMossClass?.hookBeforeMethod(
-            "playView", instance.playViewReqClass
+            if (instance.useNewMossFunc) "executePlayView" else "playView",
+            instance.playViewReqClass
         ) { param ->
             val request = param.args[0]
             val isDownload = request.callMethodAs<Int>("getDownload") >= 1

@@ -22,50 +22,65 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     private val textStyleV2Class by Weak { "com.bapis.bilibili.main.community.reply.v2.TextStyle" from mClassLoader }
     private val videoGuideClass by Weak { "com.bapis.bilibili.app.view.v1.VideoGuide" from mClassLoader }
 
+
+    private val unlockPlayLimit = sPrefs.getBoolean("play_arc_conf", false)
+    private val blockCommentGuide = sPrefs.getBoolean("block_comment_guide", false)
+    private val disableMainPageStory = sPrefs.getBoolean("disable_main_page_story", false)
+
+    // 以下为隐藏功能配置
+    private val hidden = sPrefs.getBoolean("hidden", false)
+
+    private val removeHonor = hidden && sPrefs.getBoolean("remove_video_honor", false)
+    private val removeUgcSeason = hidden && sPrefs.getBoolean("remove_video_UgcSeason", false)
+    private val removeCmdDms = hidden && sPrefs.getBoolean("remove_video_cmd_dms", false)
+    private val removeUpVipLabel = hidden && sPrefs.getBoolean("remove_up_vip_label", false)
+
+    // 搜索过滤
+    private val searchFilterUid = run {
+        sPrefs.getStringSet("search_filter_keyword_uid", null)
+            ?.mapNotNull { it.toLongOrNull() }.orEmpty()
+    }
+    private val searchFilterContents = run {
+        sPrefs.getStringSet("search_filter_keyword_content", null).orEmpty()
+    }
+    private val searchFilterContentRegexes by lazy { searchFilterContents.map { it.toRegex() } }
+    private val searchFilterContentRegexMode = sPrefs.getBoolean("search_filter_content_regex_mode", false)
+    private val searchFilterUpNames = run {
+        sPrefs.getStringSet("search_filter_keyword_upname", null).orEmpty()
+    }
+    private val searchRemoveRelatePromote = sPrefs.getBoolean("search_filter_remove_relate_promote", false)
+
+    // 评论过滤
+    private val commentFilterBlockAtComment = sPrefs.getBoolean("comment_filter_block_at_comment", false)
+    private val commentFilterAtUid = run {
+        sPrefs.getStringSet("comment_filter_keyword_at_uid", null)
+            ?.mapNotNull { it.toLongOrNull() }.orEmpty()
+    }
+    private val commentFilterContents = run {
+        sPrefs.getStringSet("comment_filter_keyword_content", null).orEmpty()
+    }
+    private val commentFilterContentRegexes by lazy { commentFilterContents.map { it.toRegex() } }
+    private val commentFilterContentRegexMode = sPrefs.getBoolean("comment_filter_content_regex_mode", false)
+    private val commentFilterAtUpNames = run {
+        sPrefs.getStringSet("comment_filter_keyword_at_upname", null).orEmpty()
+    }
+    private val targetCommentAuthorLevel = sPrefs.getLong("target_comment_author_level", 0L)
+
+    private val purifySearch = hidden && sPrefs.getBoolean("purify_search", false)
+    private val purifyCity = hidden && sPrefs.getBoolean("purify_city", false)
+    private val purifyCampus = hidden && sPrefs.getBoolean("purify_campus", false)
+
+    private val blockLiveOrder = hidden && sPrefs.getBoolean("block_live_order", false)
+    private val blockWordSearch = hidden && sPrefs.getBoolean("block_word_search", false)
+    private val blockModules = hidden && sPrefs.getBoolean("block_modules", false)
+    private val blockUpperRecommendAd = hidden && sPrefs.getBoolean("block_upper_recommend_ad", false)
+    private val blockVideoComment = hidden && sPrefs.getBoolean("block_video_comment", false)
+    private val blockViewPageAds = hidden && sPrefs.getBoolean("block_view_page_ads", false)
+
+
     override fun startHook() {
-        val hidden = sPrefs.getBoolean("hidden", false)
-        val blockLiveOrder = sPrefs.getBoolean("block_live_order", false)
-        val purifyCity = sPrefs.getBoolean("purify_city", false)
-        val removeHonor = sPrefs.getBoolean("remove_video_honor", false)
-        val removeUgcSeason = sPrefs.getBoolean("remove_video_UgcSeason", false)
-        val removeCmdDms = sPrefs.getBoolean("remove_video_cmd_dms", false)
-        val removeUpVipLabel = sPrefs.getBoolean("remove_up_vip_label", false)
-        val purifySearch = sPrefs.getBoolean("purify_search", false)
-        val searchFilterUid = run {
-            sPrefs.getStringSet("search_filter_keyword_uid", null)
-                ?.mapNotNull { it.toLongOrNull() }.orEmpty()
-        }
-        val searchFilterContents = run {
-            sPrefs.getStringSet("search_filter_keyword_content", null).orEmpty()
-        }
-        val searchFilterContentRegexes by lazy { searchFilterContents.map { it.toRegex() } }
-        val searchFilterContentRegexMode = sPrefs.getBoolean("search_filter_content_regex_mode", false)
-        val searchFilterUpNames = run {
-            sPrefs.getStringSet("search_filter_keyword_upname", null).orEmpty()
-        }
-        val commentFilterAtUid = run {
-            sPrefs.getStringSet("comment_filter_keyword_at_uid", null)
-                ?.mapNotNull { it.toLongOrNull() }.orEmpty()
-        }
-        val commentFilterContents = run {
-            sPrefs.getStringSet("comment_filter_keyword_content", null).orEmpty()
-        }
-        val commentFilterContentRegexes by lazy { commentFilterContents.map { it.toRegex() } }
-        val commentFilterContentRegexMode = sPrefs.getBoolean("comment_filter_content_regex_mode", false)
-        val commentFilterAtUpNames = run {
-            sPrefs.getStringSet("comment_filter_keyword_at_upname", null).orEmpty()
-        }
-        val commentFilterBlockAtComment = sPrefs.getBoolean("comment_filter_block_at_comment", false)
-        val targetCommentAuthorLevel = sPrefs.getLong("target_comment_author_level", 0L)
-        val purifyCampus = sPrefs.getBoolean("purify_campus", false)
-        val blockWordSearch = sPrefs.getBoolean("block_word_search", false)
-        val blockModules = sPrefs.getBoolean("block_modules", false)
-        val blockUpperRecommendAd = sPrefs.getBoolean("block_upper_recommend_ad", false)
-        val disableMainPageStory = sPrefs.getBoolean("disable_main_page_story", false)
-        val unlockPlayLimit = sPrefs.getBoolean("play_arc_conf", false)
-        val blockCommentGuide = sPrefs.getBoolean("block_comment_guide", false)
-        val blockVideoComment = sPrefs.getBoolean("block_video_comment", false)
-        val blockViewPageAds = sPrefs.getBoolean("block_view_page_ads", false)
+
+        hookMossView()
 
         if (hidden && (purifyCity || purifyCampus)) {
             listOf(
@@ -84,49 +99,15 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
             }
         }
 
-        instance.viewMossClass?.hookAfterMethod("view", instance.viewReqClass) { param ->
-            param.result ?: return@hookAfterMethod
-            val aid = param.result.callMethod("getArc")
-                ?.callMethodAs("getAid") ?: -1L
-            val like = param.result.callMethod("getReqUser")
-                ?.callMethodAs("getLike") ?: -1
-            AutoLikeHook.detail = aid to like
-            BangumiPlayUrlHook.qnApplied.set(false)
-            if (unlockPlayLimit)
-                param.result.callMethod("getConfig")
-                    ?.callMethod("setShowListenButton", true)
-            if (blockCommentGuide) {
-                param.result.runCatchingOrNull {
-                    callMethod("getLikeCustom")
-                        ?.callMethod("clearLikeComment")
-                    callMethod("getReplyPreface")
-                        ?.callMethod("clearBadgeType")
-                }
-            }
-            if (hidden && removeHonor) {
-                param.result.callMethod("clearHonor")
-            }
-            if (hidden && removeUgcSeason) {
-                param.result.callMethod("clearUgcSeason")
-            }
-            if (hidden && blockLiveOrder) {
-                param.result.callMethod("clearLiveOrderInfo")
-            }
-            if (hidden && removeUpVipLabel) {
-                param.result.callMethod("getOwnerExt")?.callMethod("getVip")
-                    ?.callMethod("clearLabel")
-            }
-        }
-
         if (hidden && removeCmdDms) {
             instance.viewMossClass?.hookAfterMethod(
-                "viewProgress",
+                if (instance.useNewMossFunc) "executeViewProgress" else "viewProgress",
                 "com.bapis.bilibili.app.view.v1.ViewProgressReq"
             ) { param ->
                 param.result?.callMethod("setVideoGuide", videoGuideClass?.new())
             }
             instance.viewUniteMossClass?.hookAfterMethod(
-                "viewProgress",
+                if (instance.useNewMossFunc) "executeViewProgress" else "viewProgress",
                 "com.bapis.bilibili.app.viewunite.v1.ViewProgressReq"
             ) { param ->
                 param.result?.run {
@@ -135,16 +116,18 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 }
             }
             instance.viewMossClass?.replaceMethod(
-                "tFInfo", "com.bapis.bilibili.app.view.v1.TFInfoReq"
+                if (instance.useNewMossFunc) "executeTFInfo" else "tFInfo",
+                "com.bapis.bilibili.app.view.v1.TFInfoReq"
             ) { null }
             instance.dmMossClass?.hookAfterMethod(
-                "dmView", instance.dmViewReqClass,
+                if (instance.useNewMossFunc) "executeDmView" else "dmView",
+                instance.dmViewReqClass,
             ) { it.result?.removeCmdDms() }
         }
         if (hidden && purifySearch) {
             "com.bapis.bilibili.app.interfaces.v1.SearchMoss".hookAfterMethod(
                 mClassLoader,
-                "defaultWords",
+                if (instance.useNewMossFunc) "executeDefaultWords" else "defaultWords",
                 "com.bapis.bilibili.app.interfaces.v1.DefaultWordsReq"
             ) { param ->
                 param.result = null
@@ -171,7 +154,7 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (hidden && blockModules) {
             "com.bapis.bilibili.app.resource.v1.ModuleMoss".hookAfterMethod(
                 mClassLoader,
-                "list",
+                if (instance.useNewMossFunc) "executeList" else "list",
                 "com.bapis.bilibili.app.resource.v1.ListReq"
             ) {
                 it.result?.callMethod("clearPools")
@@ -201,9 +184,8 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
         if (blockCommentGuide || (hidden && blockVideoComment)) {
             "com.bapis.bilibili.main.community.reply.v1.ReplyMoss".hookBeforeMethod(
                 mClassLoader,
-                "mainList",
+                if (instance.useNewMossFunc) "executeMainList" else "mainList",
                 "com.bapis.bilibili.main.community.reply.v1.MainListReq",
-                instance.mossResponseHandlerClass
             ) { param ->
                 val type = param.args[0].callMethodAs<Long>("getType")
                 if (hidden && blockVideoComment && type == 1L) {
@@ -229,37 +211,33 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             emptyPage?.callMethod("addTexts", it)
                         }
                     }
-                    param.args[1].callMethod("onNext", reply)
-                    param.result = null
+                    param.result = reply
                     return@hookBeforeMethod
                 }
                 if (!blockCommentGuide) return@hookBeforeMethod
-                param.args[1] = param.args[1].mossResponseHandlerProxy { reply ->
-                    reply?.runCatchingOrNull {
-                        callMethod("getSubjectControl")?.run {
-                            callMethod("clearEmptyBackgroundTextPlain")
-                            callMethod("clearEmptyBackgroundTextHighlight")
-                            callMethod("clearEmptyBackgroundUri")
-                            callMethod("getEmptyPage")?.let { page ->
-                                page.callMethod("clearLeftButton")
-                                page.callMethod("clearRightButton")
-                                page.callMethodAs<List<Any>>("getTextsList").takeIf { it.size > 1 }
-                                    ?.let {
-                                        page.callMethod("clearTexts")
-                                        page.callMethod("addTexts", it.first().apply {
-                                            callMethod("setRaw", "还没有评论哦")
-                                        })
-                                    }
-                            }
+                param.result.runCatchingOrNull {
+                    callMethod("getSubjectControl")?.run {
+                        callMethod("clearEmptyBackgroundTextPlain")
+                        callMethod("clearEmptyBackgroundTextHighlight")
+                        callMethod("clearEmptyBackgroundUri")
+                        callMethod("getEmptyPage")?.let { page ->
+                            page.callMethod("clearLeftButton")
+                            page.callMethod("clearRightButton")
+                            page.callMethodAs<List<Any>>("getTextsList").takeIf { it.size > 1 }
+                                ?.let {
+                                    page.callMethod("clearTexts")
+                                    page.callMethod("addTexts", it.first().apply {
+                                        callMethod("setRaw", "还没有评论哦")
+                                    })
+                                }
                         }
                     }
                 }
             }
             "com.bapis.bilibili.main.community.reply.v2.ReplyMoss".from(mClassLoader)
                 ?.hookBeforeMethod(
-                    "subjectDescription",
-                    "com.bapis.bilibili.main.community.reply.v2.SubjectDescriptionReq",
-                    instance.mossResponseHandlerClass
+                    if (instance.useNewMossFunc) "executeSubjectDescription" else "subjectDescription",
+                    "com.bapis.bilibili.main.community.reply.v2.SubjectDescriptionReq"
                 ) { param ->
                     val defaultText = textV2Class?.new()?.apply {
                         val tipStr = if (hidden && blockVideoComment) {
@@ -276,33 +254,37 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                             callMethod("setStyle", it)
                         }
                     } ?: return@hookBeforeMethod
-                    param.args[1] = param.args[1].mossResponseHandlerProxy { reply ->
-                        reply?.runCatchingOrNull {
-                            callMethod("getEmptyPage")?.run {
-                                callMethod("clearLeftButton")
-                                callMethod("clearRightButton")
-                                callMethod("ensureTextsIsMutable")
-                                callMethodAs<MutableList<Any>>("getTextsList").run {
-                                    clear()
-                                    add(defaultText)
-                                }
-                                if (!(hidden && blockVideoComment)) return@run
-                                callMethod(
-                                    "setImageUrl",
-                                    "https://i0.hdslb.com/bfs/app-res/android/img_holder_forbid_style1.webp"
-                                )
+                    param.result.runCatchingOrNull {
+                        callMethod("getEmptyPage")?.run {
+                            callMethod("clearLeftButton")
+                            callMethod("clearRightButton")
+                            callMethod("ensureTextsIsMutable")
+                            callMethodAs<MutableList<Any>>("getTextsList").run {
+                                clear()
+                                add(defaultText)
                             }
+                            if (!(hidden && blockVideoComment)) return@run
+                            callMethod(
+                                "setImageUrl",
+                                "https://i0.hdslb.com/bfs/app-res/android/img_holder_forbid_style1.webp"
+                            )
                         }
                     }
                 }
         }
-        val needSearchFilter = hidden and (searchFilterContents.isNotEmpty() or searchFilterUid.isNotEmpty() or searchFilterUpNames.isNotEmpty())
+        val needSearchFilter = hidden and (searchFilterContents.isNotEmpty() or searchFilterUid.isNotEmpty() or searchFilterUpNames.isNotEmpty()) or searchRemoveRelatePromote
         if (needSearchFilter) {
             instance.searchAllResponseClass?.hookAfterMethod("getItemList") { p ->
                 val items = p.result as? List<Any?> ?: return@hookAfterMethod
                 p.result = items.filter { item ->
                     val videoCard = item?.getObjectField("cardItem_") ?: return@filter true
-                    if (instance.searchVideoCardClass?.isInstance(videoCard) == false) return@filter true
+                    if (instance.searchVideoCardClass?.isInstance(videoCard) == false) {
+                        if (searchRemoveRelatePromote) {
+                            if (item.callMethodAs<Boolean>("hasCm")) return@filter false
+                            if (item.callMethodAs<Boolean>("hasSpecial")) return@filter false
+                        }
+                        return@filter true
+                    }
                     if (videoCard.getLongField("mid_") in searchFilterUid) return@filter false
                     if (videoCard.getObjectFieldAs<String>("author_") in searchFilterUpNames) return@filter false
                     if (searchFilterContentRegexMode) {
@@ -361,53 +343,121 @@ class ProtoBufHook(classLoader: ClassLoader) : BaseHook(classLoader) {
                 }
         }
 
-        if (!(hidden && (blockViewPageAds || removeHonor || blockVideoComment))) return
-        // 视频详情页荣誉卡片
-        fun Any.isHonor() = callMethodAs("hasHonor") && removeHonor
-
-        // 视频详情页活动卡片(含会员购等), 区分于视频下方推荐处的广告卡片
-        fun Any.isActivityEntranceModule() =
-            callMethodAs("hasActivityEntranceModule") && blockViewPageAds
-
-        // 视频详情页直播预约卡片
-        fun Any.isLiveOrder() = callMethodAs("hasLiveOrder") && blockLiveOrder
-
-        fun MutableList<Any>.filter() = removeAll {
-            it.isActivityEntranceModule() || it.isHonor() || it.isLiveOrder()
-        }
-
-        instance.viewUniteMossClass?.hookAfterMethod(
-            "view", instance.viewUniteReqClass
-        ) { param ->
-            if (instance.networkExceptionClass?.isInstance(param.throwable) == true) return@hookAfterMethod
-            param.result ?: return@hookAfterMethod
-
-            if (blockViewPageAds) {
-                param.result.callMethod("clearCm")
-            }
-
-            param.result.callMethod("getTab")?.run {
-                callMethod("ensureTabModuleIsMutable")
-                val tabModuleList = callMethodAs<MutableList<Any>>("getTabModuleList")
-                tabModuleList.removeAll {
-                    blockVideoComment && it.callMethodAs("hasReply")
-                }
-                if (!(blockViewPageAds || removeHonor)) return@run
-                tabModuleList.map {
-                    if (!it.callMethodAs<Boolean>("hasIntroduction")) return@map
-                    it.callMethodAs<Any>("getIntroduction").run {
-                        callMethod("ensureModulesIsMutable")
-                        callMethodAs<MutableList<Any>>("getModulesList").filter()
-                    }
-                }
-            }
-        }
-
         if (!sPrefs.getBoolean("replace_story_video", false)) return
         val disableBooleanValue = "com.bapis.bilibili.app.distribution.BoolValue".from(mClassLoader)?.callStaticMethod("getDefaultInstance") ?: return
         "com.bapis.bilibili.app.distribution.setting.play.PlayConfig".from(mClassLoader)?.run {
             replaceAllMethods("getLandscapeAutoStory") { disableBooleanValue }
             replaceAllMethods("getShouldAutoStory") { disableBooleanValue }
+        }
+    }
+
+    private fun hookMossView() {
+        instance.viewUniteMossClass?.hookAfterMethod(
+            "executeView",
+            instance.viewUniteReqClass
+        ) { param ->
+            param.result?.let {
+                handleViewReply(it, true)
+            }
+        }
+
+        instance.viewMossClass?.hookAfterMethod(
+            if (instance.useNewMossFunc) "executeView" else "view",
+            instance.viewReqClass
+        ) { param ->
+            param.result?.let {
+                handleViewReply(it, false)
+            }
+        }
+    }
+
+    private fun handleViewReply(viewReply: Any, isUnite: Boolean) {
+        val aid = viewReply.callMethod("getArc")
+            ?.callMethodAs("getAid") ?: -1L
+        val like = viewReply.callMethod("getReqUser")
+            ?.callMethodAs("getLike") ?: -1
+
+        if (aid > 0 && like != -1) {
+            AutoLikeHook.detail = aid to like
+        }
+
+        BangumiPlayUrlHook.qnApplied.set(false)
+
+        // 视频详情页荣誉卡片
+        fun Any.isHonor() = removeHonor && callMethodAs("hasHonor")
+
+        // 视频详情页活动卡片(含会员购等), 区分于视频下方推荐处的广告卡片
+        fun Any.isActivityEntranceModule() = blockViewPageAds && callMethodAs("hasActivityEntranceModule")
+
+        // 视频详情页直播预约卡片
+        fun Any.isLiveOrder() = blockLiveOrder && callMethodAs("hasLiveOrder")
+
+        // 视频下方分集列表
+        fun Any.isUgcSeason() = removeUgcSeason && callMethodAs("hasUgcSeason")
+
+        fun Any.isLikeComment() = blockCommentGuide && callMethodAs("hasLikeComment")
+
+        fun MutableList<Any>.filter() = removeAll {
+            it.isActivityEntranceModule() || it.isHonor() || it.isLiveOrder() || it.isUgcSeason() || it.isLikeComment()
+        }
+
+        if (isUnite) {
+            if (blockViewPageAds) {
+                viewReply.callMethod("clearCm")
+            }
+
+            if (hidden && removeUpVipLabel) {
+                viewReply.callMethod("getOwner")?.callMethod("getVip")?.callMethod("clearLabel")
+            }
+
+            viewReply.callMethod("getTab")?.run {
+                callMethod("ensureTabModuleIsMutable")
+                val tabModuleList = callMethodAs<MutableList<Any>>("getTabModuleList")
+                if (blockVideoComment) {
+                    tabModuleList.removeAll {
+                        it.callMethodAs("hasReply")
+                    }
+                }
+                if (!(blockCommentGuide || blockViewPageAds || removeHonor || removeUgcSeason)) return@run
+                tabModuleList.firstOrNull { it.callMethod("hasIntroduction") == true }?.let {
+                    it.callMethodAs<Any>("getIntroduction").run {
+                        callMethod("ensureModulesIsMutable")
+                        callMethodAs<MutableList<Any>>("getModulesList").filter()
+                    }
+                }
+                if (blockCommentGuide) {
+                    tabModuleList.firstOrNull { it.callMethod("hasReply") == true }?.let { tabModule ->
+                        tabModule.callMethod("getReply")?.callMethod("getReplyStyle")
+                            ?.callMethod("clearBadgeType")
+                    }
+                }
+            }
+
+            return
+        }
+
+        if (unlockPlayLimit)
+            viewReply.callMethod("getConfig")?.callMethod("setShowListenButton", true)
+        if (blockCommentGuide) {
+            viewReply.runCatchingOrNull {
+                callMethod("getLikeCustom")
+                    ?.callMethod("clearLikeComment")
+                callMethod("getReplyPreface")
+                    ?.callMethod("clearBadgeType")
+            }
+        }
+
+        if (hidden && removeHonor) {
+            viewReply.callMethod("clearHonor")
+        }
+        if (hidden && removeUgcSeason) {
+            viewReply.callMethod("clearUgcSeason")
+        }
+        if (hidden && blockLiveOrder) {
+            viewReply.callMethod("clearLiveOrderInfo")
+        }
+        if (hidden && removeUpVipLabel) {
+            viewReply.callMethod("getOwnerExt")?.callMethod("getVip")?.callMethod("clearLabel")
         }
     }
 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.future.future
 import me.iacn.biliroaming.hook.*
+import me.iacn.biliroaming.hook.KotlinxJsonHook
 import me.iacn.biliroaming.utils.*
 import java.util.concurrent.CompletableFuture
 
@@ -78,62 +79,71 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
                     BiliBiliPackage(lpparam.classLoader, param.args[0] as Context)
                     if (BuildConfig.DEBUG) {
-                        startHook(SSLHook(lpparam.classLoader))
+                        startHook { SSLHook(lpparam.classLoader) }
                     }
-                    startHook(HintHook(lpparam.classLoader))
-                    startHook(BangumiSeasonHook(lpparam.classLoader))
-                    startHook(BangumiPlayUrlHook(lpparam.classLoader))
-                    startHook(PegasusHook(lpparam.classLoader))
-                    startHook(CustomThemeHook(lpparam.classLoader))
-                    startHook(TeenagersModeHook(lpparam.classLoader))
-                    startHook(JsonHook(lpparam.classLoader))
-                    startHook(ShareHook(lpparam.classLoader))
-                    startHook(AutoLikeHook(lpparam.classLoader))
-                    startHook(SettingHook(lpparam.classLoader))
-                    startHook(SplashHook(lpparam.classLoader))
-                    startHook(EnvHook(lpparam.classLoader))
-                    startHook(DownloadThreadHook(lpparam.classLoader))
-                    startHook(MusicNotificationHook(lpparam.classLoader))
-                    startHook(DrawerHook(lpparam.classLoader))
-                    startHook(CoverHook(lpparam.classLoader))
-                    startHook(SubtitleHook(lpparam.classLoader))
-                    startHook(CopyHook(lpparam.classLoader))
-                    startHook(LiveRoomHook(lpparam.classLoader))
-                    startHook(QualityHook(lpparam.classLoader))
-                    startHook(DynamicHook(lpparam.classLoader))
-                    startHook(ProtoBufHook(lpparam.classLoader))
-                    startHook(PlayArcConfHook(lpparam.classLoader))
-                    startHook(TryWatchVipQualityHook(lpparam.classLoader))
-                    startHook(AllowMiniPlayHook(lpparam.classLoader))
-                    startHook(StartActivityHook(lpparam.classLoader))
-                    startHook(FullStoryHook(lpparam.classLoader))
-                    startHook(DialogBlurBackgroundHook(lpparam.classLoader))
-                    startHook(PlayerLongPressHook(lpparam.classLoader))
-                    startHook(BlockUpdateHook(lpparam.classLoader))
-                    startHook(VipSectionHook(lpparam.classLoader))
-                    startHook(CommentImageHook(lpparam.classLoader))
-                    startHook(WebViewHook(lpparam.classLoader))
-                    startHook(P2pHook(lpparam.classLoader))
-                    startHook(DanmakuHook(lpparam.classLoader))
-                    startHook(BangumiPageAdHook(lpparam.classLoader))
-                    startHook(VideoQualityHook(lpparam.classLoader))
-                    startHook(PublishToFollowingHook(lpparam.classLoader))
-                    startHook(UposReplaceHook(lpparam.classLoader))
-                    startHook(SpeedHook(lpparam.classLoader))
-                    startHook(MultiWindowHook(lpparam.classLoader))
+                    startHook { KillDelayBootHook(lpparam.classLoader) }
+                    startHook { HintHook(lpparam.classLoader) }
+                    startHook { BangumiSeasonHook(lpparam.classLoader) }
+                    startHook { BangumiPlayUrlHook(lpparam.classLoader) }
+                    startHook { PegasusHook(lpparam.classLoader) }
+                    startHook { CustomThemeHook(lpparam.classLoader) }
+                    startHook { TeenagersModeHook(lpparam.classLoader) }
+                    startHook { JsonHook(lpparam.classLoader) }
+                    startHook { GsonHook(lpparam.classLoader) }
+                    startHook { KotlinxJsonHook(lpparam.classLoader) }
+                    startHook { ShareHook(lpparam.classLoader) }
+                    startHook { AutoLikeHook(lpparam.classLoader) }
+                    startHook { SettingHook(lpparam.classLoader) }
+                    startHook { SplashHook(lpparam.classLoader) }
+                    startHook { EnvHook(lpparam.classLoader) }
+                    startHook { DownloadThreadHook(lpparam.classLoader) }
+                    startHook { MusicNotificationHook(lpparam.classLoader) }
+                    startHook { DrawerHook(lpparam.classLoader) }
+                    startHook { CoverHook(lpparam.classLoader) }
+                    startHook { SubtitleHook(lpparam.classLoader) }
+                    startHook { CopyHook(lpparam.classLoader) }
+                    startHook { CopyCommentHook(lpparam.classLoader) }
+                    startHook { LiveRoomHook(lpparam.classLoader) }
+                    startHook { QualityHook(lpparam.classLoader) }
+                    startHook { DynamicHook(lpparam.classLoader) }
+                    startHook { ProtoBufHook(lpparam.classLoader) }
+                    startHook { PlayArcConfHook(lpparam.classLoader) }
+                    startHook { TryWatchVipQualityHook(lpparam.classLoader) }
+                    startHook { AllowMiniPlayHook(lpparam.classLoader) }
+                    startHook { StartActivityHook(lpparam.classLoader) }
+                    startHook { FullStoryHook(lpparam.classLoader) }
+                    startHook { DialogBlurBackgroundHook(lpparam.classLoader) }
+                    startHook { PlayerLongPressHook(lpparam.classLoader) }
+                    startHook { BlockUpdateHook(lpparam.classLoader) }
+                    startHook { VipSectionHook(lpparam.classLoader) }
+                    startHook { CommentImageHook(lpparam.classLoader) }
+                    startHook { WebViewHook(lpparam.classLoader) }
+                    startHook { P2pHook(lpparam.classLoader) }
+                    startHook { DanmakuHook(lpparam.classLoader) }
+                    startHook { BangumiPageAdHook(lpparam.classLoader) }
+                    startHook { VideoQualityHook(lpparam.classLoader) }
+                    // startHook(PublishToFollowingHook(lpparam.classLoader))
+                    startHook { UposReplaceHook(lpparam.classLoader) }
+                    startHook { SpeedHook(lpparam.classLoader) }
+                    startHook { MultiWindowHook(lpparam.classLoader) }
+                    startHook { LiveQualityHook(lpparam.classLoader) }
+                    startHook { StoryPlayerAdHook(lpparam.classLoader) }
+                    startHook { LongPressSpeed(lpparam.classLoader) }
+                    startHook { SkipVideoAd(lpparam.classLoader) }
                 }
 
                 lpparam.processName.endsWith(":web") -> {
                     BiliBiliPackage(lpparam.classLoader, param.args[0] as Context)
                     CustomThemeHook(lpparam.classLoader).insertColorForWebProcess()
-                    startHook(WebViewHook(lpparam.classLoader))
-                    startHook(ShareHook(lpparam.classLoader))
-                    startHook(DialogBlurBackgroundHook(lpparam.classLoader))
+                    startHook { WebViewHook(lpparam.classLoader) }
+                    startHook { ShareHook(lpparam.classLoader) }
+                    startHook { DialogBlurBackgroundHook(lpparam.classLoader) }
+                    startHook { RewardAdHook(lpparam.classLoader) }
                 }
 
                 lpparam.processName.endsWith(":download") -> {
                     BiliBiliPackage(lpparam.classLoader, param.args[0] as Context)
-                    startHook(BangumiPlayUrlHook(lpparam.classLoader))
+                    startHook { BangumiPlayUrlHook(lpparam.classLoader) }
                 }
             }
         }
@@ -143,8 +153,17 @@ class XposedInit : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    @Deprecated(
+        "Use startHook(hookerCreater: () -> BaseHook) instead",
+        ReplaceWith("startHook { hooker }")
+    )
     private fun startHook(hooker: BaseHook) {
+        startHook { hooker }
+    }
+
+    private fun startHook(hookerCreater: () -> BaseHook) {
         try {
+            val hooker = hookerCreater()
             hookers.add(hooker)
             hooker.startHook()
         } catch (e: Throwable) {

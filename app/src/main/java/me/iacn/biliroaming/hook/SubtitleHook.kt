@@ -133,8 +133,9 @@ class SubtitleHook(classLoader: ClassLoader) : BaseHook(classLoader) {
     }
     private val offset by lazy { sPrefs.getInt("subtitle_offset", 0) }
 
-    private val closeText =
+    private val closeText by lazy {
         currentContext.getString(getResId("Player_option_subtitle_lan_doc_nodisplay", "string"))
+    }
 
     private var subtitleFont: Typeface? = null
 
@@ -313,7 +314,8 @@ class SubtitleHook(classLoader: ClassLoader) : BaseHook(classLoader) {
 
     private fun hookSubtitleList() {
         instance.dmMossClass?.hookAfterMethod(
-            "dmView", instance.dmViewReqClass,
+            if (instance.useNewMossFunc) "executeDmView" else "dmView",
+            instance.dmViewReqClass,
         ) { param ->
             param.result.hookSubtitleList(param.args[0])?.let { param.result = it }
         }
